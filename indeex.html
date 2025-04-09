@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Cube Rubik 3D</title>
+  <style>
+    body { margin: 0; overflow: hidden; font-family: sans-serif; }
+    #container { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+    #controls { padding: 10px; background: #f0f0f0; display: flex; gap: 10px; justify-content: center; }
+    canvas { flex: 1; display: block; }
+  </style>
+</head>
+<body>
+<div id="container">
+  <div id="controls">
+    <button onclick="shuffleCube()">Mélanger</button>
+    <button onclick="resetCube()">Réinitialiser</button>
+  </div>
+  <div id="scene-container"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
+<script>
+  let scene, camera, renderer, cubeGroup = new THREE.Group();
+  const cubeSize = 1;
+
+  init();
+  animate();
+
+  function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xffffff);
+
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera.position.set(5, 5, 5);
+    camera.lookAt(0, 0, 0);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    for (let x = -1; x <= 1; x++) {
+      for (let y = -1; y <= 1; y++) {
+        for (let z = -1; z <= 1; z++) {
+          const geom = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+          const mat = [
+            new THREE.MeshBasicMaterial({color: x === 1 ? 'red' : 'gray'}),
+            new THREE.MeshBasicMaterial({color: x === -1 ? 'orange' : 'gray'}),
+            new THREE.MeshBasicMaterial({color: y === 1 ? 'yellow' : 'gray'}),
+            new THREE.MeshBasicMaterial({color: y === -1 ? 'white' : 'gray'}),
+            new THREE.MeshBasicMaterial({color: z === 1 ? 'blue' : 'gray'}),
+            new THREE.MeshBasicMaterial({color: z === -1 ? 'green' : 'gray'}),
+          ];
+          const cubelet = new THREE.Mesh(geom, mat);
+          cubelet.position.set(x * cubeSize, y * cubeSize, z * cubeSize);
+          cubeGroup.add(cubelet);
+        }
+      }
+    }
+
+    scene.add(cubeGroup);
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight - 50);
+    document.getElementById('scene-container').appendChild(renderer.domElement);
+
+    window.addEventListener('resize', onWindowResize);
+  }
+
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / (window.innerHeight - 50);
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight - 50);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    cubeGroup.rotation.y += 0.01;
+    renderer.render(scene, camera);
+  }
+
+  function shuffleCube() {
+    cubeGroup.rotation.x += Math.random();
+    cubeGroup.rotation.y += Math.random();
+    cubeGroup.rotation.z += Math.random();
+  }
+
+  function resetCube() {
+    cubeGroup.rotation.set(0, 0, 0);
+  }
+</script>
+</body>
+</html>
+Ajout du fichier index.html
